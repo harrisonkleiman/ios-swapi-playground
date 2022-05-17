@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SWAPI Playground | Devmountain Foundations</title>
+
+    <link
+      href="_static/pygments.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link href="_static/devmountain.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+
+    <script src="_static/pdfobject.min.js"></script>
+  </head>
+  <body>
+    <div id="handouts-container">
+      <header id="page-header">
+        <p id="project-title">Devmountain Foundations</p>
+        <p id="page-title">SWAPI Playground</p>
+        <p id="backlink">
+          <a href="/"> &laquo; Back to Homepage </a>
+        </p>
+      </header>
+
+      <nav id="page-toc"><ul>
+<li><a class="reference internal" href="#">SWAPI Playground</a><ul>
+<li><a class="reference internal" href="#part-zero-familiarity-with-the-documentation">Part Zero - Familiarity with the Documentation</a></li>
+<li><a class="reference internal" href="#part-one-postman">Part One - Postman</a></li>
+<li><a class="reference internal" href="#part-two-models">Part Two - Models</a></li>
+<li><a class="reference internal" href="#part-three-swapiservice">Part Three - SwapiService</a></li>
+<li><a class="reference internal" href="#part-four-perform-get-requests">Part Four - Perform GET Requests</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+
+      <main id="page-content">  <section class="section" id="swapi-playground">
+<h1>SWAPI Playground</h1>
+<p>In this project students will send HTTP requests in Postman and then in Xcode Playgrounds. In the finished playground, they will perform a fetch for a Person and then a series of fetches for each Film in which the person appears.</p>
+<p>Before we begin, one disclaimer: These instructions are designed to work with the Star Wars API, based on how the API documentation is laid out at the time we last edited these instructions. Unfortunately, if SWAPI were to change how their API works, our instructions may no longer be correct. If you notice that any of these instructions no longer line up with how the API works, please notify an instructor so we can get an update put in.</p>
+<section class="section" id="part-zero-familiarity-with-the-documentation">
+<h2>Part Zero - Familiarity with the Documentation</h2>
+<ul class="simple">
+<li><p>Find which endpoints to hit for people and films</p></li>
+<li><p>Look at a sample response (JSON)</p></li>
+<li><p>Determine how to structure your model</p></li>
+</ul>
+<p>All data in this project is retrieved from <code class="docutils literal notranslate"><span class="pre">https://swapi.dev/</span></code>. Because your project depends entirely on communication to the server, you need to determine two things:</p>
+<ul class="simple">
+<li><p>How/where to talk to the server (outgoing)</p></li>
+<li><p>How to understand the response (incoming)</p></li>
+</ul>
+<ol class="arabic simple">
+<li><p>Visit the above URL and look at the documentation. The base URL is prominently displayed on a label. <code class="docutils literal notranslate"><span class="pre">https://swapi.dev/api/</span></code>. All requests to the server will begin with that URL.</p></li>
+<li><p>The sample request has two components added to it - <code class="docutils literal notranslate"><span class="pre">people/</span></code>, the person endpoint we’ll be hitting, and <code class="docutils literal notranslate"><span class="pre">1/</span></code> the “ID” for a particular person. In this case, Luke Skywalker.</p></li>
+<li><p>You have your Person endpoint, but you still need the Film endpoint. At the top-right, hit “Documentation” and then look for “Films”.</p></li>
+<li><p>It has the same base URL but this time the endpoint is named <code class="docutils literal notranslate"><span class="pre">films/</span></code>. According to the documentation, the Film endpoint also takes an ID.</p></li>
+<li><p>You now have both of your endpoints.</p></li>
+</ol>
+</section>
+<section class="section" id="part-one-postman">
+<h2>Part One - Postman</h2>
+<ul class="simple">
+<li><p>Install Postman if you haven’t already and open up a new request.</p></li>
+<li><p>Paste the full URL for a Person and hit Send. If successful, Postman will print out JSON person information. If you aren’t getting correct info, make sure your URL is formatted correctly. <code class="docutils literal notranslate"><span class="pre">https://swapi.dev/api/people/{CHARACTER_ID}</span></code></p></li>
+<li><p>The field “films” is an array of URL strings. Copy one of these to your clipboard and open a new tab in Postman.</p></li>
+<li><p>Paste the film URL and hit Send. The response JSON is your Film model.</p></li>
+<li><p>You now have both JSON responses and are ready to declare your models in Swift.</p></li>
+</ul>
+</section>
+<section class="section" id="part-two-models">
+<h2>Part Two - Models</h2>
+<ul class="simple">
+<li><p>In a new Swift playground, create a Person struct. Person is a Swift representation of JSON data, so its properties need to be based on the JSON you received in Postman.</p></li>
+<li><p>Give Person <code class="docutils literal notranslate"><span class="pre">name:</span> <span class="pre">String</span></code> and <code class="docutils literal notranslate"><span class="pre">films:</span> <span class="pre">[URL]</span></code> properties. Add any other properties you would also like to decode. Make sure to spell them identically to the JSON.</p></li>
+<li><p>Create a Film struct and, using the JSON, give it properties for <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">opening_crawl</span></code> and <code class="docutils literal notranslate"><span class="pre">release_date</span></code>. It’s ok that your property names are written in snake_case. In the future we’ll learn strategies to avoid this.</p></li>
+<li><p>Conform both of your types to <code class="docutils literal notranslate"><span class="pre">Decodable</span></code>.</p></li>
+</ul>
+</section>
+<section class="section" id="part-three-swapiservice">
+<h2>Part Three - SwapiService</h2>
+<p><strong>GET Person</strong></p>
+<ul class="simple">
+<li><p>Below your two custom types, create a class named <code class="docutils literal notranslate"><span class="pre">SwapiService</span></code>. This class will be responsible for fetching data from SWAPI and parsing it into your models.</p></li>
+<li><p>Since both fetches use the same base URL, add it to the top level of your SwapiService. <code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">private</span> <span class="pre">let</span> <span class="pre">baseURL</span> <span class="pre">=</span> <span class="pre">URL(string:</span> <span class="pre">&quot;https://swapi.dev/api/&quot;)</span></code></p></li>
+<li><p>Declare a static function “fetchPerson” that takes an id of type <code class="docutils literal notranslate"><span class="pre">Int</span></code> and a completion block.</p></li>
+</ul>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">static</span> <span class="kd">func</span> <span class="nf">fetchPerson</span><span class="p">(</span><span class="n">id</span><span class="p">:</span> <span class="nb">Int</span><span class="p">,</span> <span class="n">completion</span><span class="p">:</span> <span class="p">@</span><span class="n">escaping</span> <span class="p">(</span><span class="n">Person</span><span class="p">?)</span> <span class="p">-&gt;</span> <span class="nb">Void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 1 - Prepare URL</span>
+
+  <span class="c1">// 2 - Contact server</span>
+
+  <span class="c1">// 3 - Handle errors</span>
+
+  <span class="c1">// 4 - Check for data</span>
+
+  <span class="c1">// 5 - Decode Person from JSON</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Step one is to prepare your URL. Unwrap the base URL and in the <code class="docutils literal notranslate"><span class="pre">else</span></code> clause, call <code class="docutils literal notranslate"><span class="pre">completion(nil)</span></code>.</p></li>
+<li><p>Declare <code class="docutils literal notranslate"><span class="pre">finalURL</span></code> by calling <code class="docutils literal notranslate"><span class="pre">baseURL.appendingPathComponent()</span></code> and pass in the rest of the Person endpoint path.</p></li>
+<li><p>To contact the server, call <code class="docutils literal notranslate"><span class="pre">URLSession.shared.dataTask(with:completion:)</span></code>. Pass in your URL and then hover over the completion block and hit “return” to expand it.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">.resume()</span></code> to the closing bracket of your completion block.</p></li>
+<li><p>Name the arguments <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">_</span></code> and <code class="docutils literal notranslate"><span class="pre">error</span></code>.</p></li>
+<li><p>The next step is to handle errors inside the data task. Use <code class="docutils literal notranslate"><span class="pre">if-let</span></code> to unwrap the optional error. Print it out and call <code class="docutils literal notranslate"><span class="pre">completion(nil)</span></code> if there is one. Any time completion is called, return from the function as well.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">guard</span> <span class="pre">let</span></code> to unwrap the data. As before, call completion in the <code class="docutils literal notranslate"><span class="pre">else</span></code> clause.</p></li>
+</ul>
+<p>Because decoding is a throwing function, the rest of the data task will take place inside of a <code class="docutils literal notranslate"><span class="pre">do-catch</span></code> block.</p>
+<ul class="simple">
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">do</span></code> portion. Declare an instance of <code class="docutils literal notranslate"><span class="pre">JSONDecoder</span></code> and name it “decoder”.</p></li>
+<li><p>Call the decoder to decode a Person from the data. You have to try in case it throws an error. <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">person</span> <span class="pre">=</span> <span class="pre">try</span> <span class="pre">decoder.decode(Person.self,</span> <span class="pre">from:</span> <span class="pre">data)</span></code></p></li>
+<li><p>If person successfully decodes, complete with it.</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">catch</span></code> block, print out the error and complete with <code class="docutils literal notranslate"><span class="pre">nil</span></code>.</p></li>
+<li><p>Test out your fetch function by calling it and printing out the resulting Person. If it fails, your prior error handling should print an error describing why.</p></li>
+</ul>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">SwapiService</span><span class="p">.</span><span class="n">fetchPerson</span><span class="p">(</span><span class="n">id</span><span class="p">:</span> <span class="mi">10</span><span class="p">)</span> <span class="p">{</span> <span class="n">person</span> <span class="k">in</span>
+  <span class="k">if</span> <span class="kd">let</span> <span class="nv">person</span> <span class="p">=</span> <span class="n">person</span> <span class="p">{</span>
+      <span class="bp">print</span><span class="p">(</span><span class="n">person</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>GET Film</strong></p>
+<ul class="simple">
+<li><p>Declare a static function that takes in a URL and completion block of type <code class="docutils literal notranslate"><span class="pre">(Film?)</span> <span class="pre">-&gt;</span> <span class="pre">Void</span></code>.</p></li>
+</ul>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">static</span> <span class="kd">func</span> <span class="nf">fetchFilm</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="n">URL</span><span class="p">,</span> <span class="n">completion</span><span class="p">:</span> <span class="p">@</span><span class="n">escaping</span> <span class="p">(</span><span class="n">Film</span><span class="p">?)</span> <span class="p">-&gt;</span> <span class="nb">Void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 1 - Contact server</span>
+
+  <span class="c1">// 2 - Handle errors</span>
+
+  <span class="c1">// 3 - Check for data</span>
+
+  <span class="c1">// 4 - Decode Film from JSON</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This function takes in a completed URL, so you won’t need to do any additional preparation on it.</p>
+<ul class="simple">
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">URLSession.shared.dataTask(with:completion:)</span></code>. Pass in the url, expand it and give the same argument names as before.</p></li>
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">.resume()</span></code> at the end of the completion block.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">if-let</span></code> to unwrap the error and <code class="docutils literal notranslate"><span class="pre">guard</span> <span class="pre">let</span></code> to unwrap data. Don’t forget to call <code class="docutils literal notranslate"><span class="pre">completion(nil)</span></code> in both cases and <code class="docutils literal notranslate"><span class="pre">return</span></code>.</p></li>
+<li><p>Time to decode. Open up your <code class="docutils literal notranslate"><span class="pre">do-catch</span></code> and declare another <code class="docutils literal notranslate"><span class="pre">JSONDecoder</span></code>.</p></li>
+<li><p>Use the same syntax as before to decode a film. If successful, complete with it.</p></li>
+<li><p>Remember to handle errors and call completion in the <code class="docutils literal notranslate"><span class="pre">catch</span></code> block.</p></li>
+</ul>
+</section>
+<section class="section" id="part-four-perform-get-requests">
+<h2>Part Four - Perform GET Requests</h2>
+<p><strong>Separate Code</strong></p>
+<ul class="simple">
+<li><p>Declare a function called <code class="docutils literal notranslate"><span class="pre">fetchFilm(url:</span> <span class="pre">URL)</span></code>. Inside of that function, call your <code class="docutils literal notranslate"><span class="pre">SwapiService</span></code> and fetch a film from the passed in url.</p></li>
+<li><p>Print out the result of the fetch.</p></li>
+</ul>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">func</span> <span class="nf">fetchFilm</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="n">URL</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">SwapiService</span><span class="p">.</span><span class="n">fetchFilm</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="n">url</span><span class="p">)</span> <span class="p">{</span> <span class="n">film</span> <span class="k">in</span>
+      <span class="k">if</span> <span class="kd">let</span> <span class="nv">film</span> <span class="p">=</span> <span class="n">film</span> <span class="p">{</span>
+          <span class="bp">print</span><span class="p">(</span><span class="n">film</span><span class="p">)</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Final Product</strong></p>
+<ul class="simple">
+<li><p>Below the print statement in your Person fetch. Create a <code class="docutils literal notranslate"><span class="pre">for</span></code> loop and call your new function for each URL in the person’s films array.</p></li>
+<li><p>If everything has been done correctly to this point, you are now able to pass in any person id and see the character info + all films in which it appears.</p></li>
+</ul>
+</section>
+</section>
+ 
+      </main>
+
+      <footer id="page-footer">
+        <p>&copy; 2021 Devmountain</p>
+      </footer>
+    </div>
+
+    <script src="_static/main.js"></script>
+      <script src="_static/jquery.js"></script>
+      <script src="_static/underscore.js"></script>
+      <script src="_static/doctools.js"></script>
+  </body>
+</html>
